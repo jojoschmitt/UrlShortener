@@ -15,13 +15,13 @@ public class UrlMapping {
     private String originalUrl;
 
     @Column(nullable = false, unique = true)
-    private String shortUrlRep;
+    private String shortUrlRep;  // The alphanumeric part of the short URL.
 
     @Column(nullable = false, unique = true)
-    private String shortUrl;
+    private String shortUrl;  // The fully qualified shortened URL including alphanumeric part.
 
     @Column(nullable = false, unique = true)
-    private long shortUrlId;
+    private long shortUrlId;  // Unique number representation (ID) of the alphanumeric part of the short URL.
 
     @Column(nullable = false, updatable = false)
     private Integer ttl;  // In minutes

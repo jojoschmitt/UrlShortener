@@ -1,6 +1,8 @@
 package de.abat.assignment.UrlShortener.service;
 
 import de.abat.assignment.UrlShortener.repository.UrlMappingRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,8 @@ import static de.abat.assignment.UrlShortener.service.ShortUrlCoder.encode;
 
 @Component
 public class ShortUrlRepGenerator {
+
+    Logger logger = LoggerFactory.getLogger(ShortUrlRepGenerator.class);
 
     private final PriorityQueue<Long> reusableIds = new PriorityQueue<>();
 
@@ -24,6 +28,7 @@ public class ShortUrlRepGenerator {
         while (shortUrIds.contains(smallestId)) {
             smallestId++;
         }
+        logger.debug("Next smallest free short URL ID is {}", smallestId);
         return encode(smallestId);
     }
 }

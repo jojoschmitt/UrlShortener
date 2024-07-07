@@ -3,15 +3,21 @@ package de.abat.assignment.UrlShortener.service;
 import de.abat.assignment.UrlShortener.entity.UrlMapping;
 import de.abat.assignment.UrlShortener.repository.UrlMappingRepository;
 import de.abat.assignment.UrlShortener.util.ExceptionMessages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
 public class UrlShortenerService {
+
+    Logger logger = LoggerFactory.getLogger(UrlShortenerService.class);
 
     @Autowired
     private UrlMappingRepository urlMappingRepository;
@@ -20,12 +26,14 @@ public class UrlShortenerService {
     private ShortUrlRepGenerator shortUrlRepGenerator;
 
     /**
-     *
-     * @param unsafeOriginalUrl
-     * @param unsafeTtl
-     * @return The shortened URL as a string.
+     * Checks the validity of user inputs, shortens the original URL, stores it in the database,
+     * and returns the shortened URL.
+     * @param unsafeOriginalUrl User input, original URL to be shortened.
+     * @param unsafeShortUrlRep Optional user input, desired short URL representation.
+     * @param unsafeTtl Optional user input, time to live in minutes. -1: On expiration.
+     * @return The string of the full shorted URL that redirects the user to the original URL.
      * @throws NumberFormatException in case the provided TTL is not an integer.
-     * @throws IllegalArgumentException in case the provided TTL is non-positive, the original or short URL is invalid.
+     * @throws IllegalArgumentException in case any of the user inputs is malformed.
      */
     public String shortenUrl(String unsafeOriginalUrl, Optional<String> unsafeShortUrlRep, Optional<String> unsafeTtl) {
         UrlMapping urlMapping = new UrlMapping();
@@ -42,6 +50,7 @@ public class UrlShortenerService {
         urlMapping.setCreationTimestamp(LocalDateTime.now());
 
         urlMappingRepository.save(urlMapping);
+        logger.debug("Saved short URL representation {} to database", shortUrlRep);
 
         return urlMappingRepository.findByShortUrlRep(shortUrlRep).getShortUrl();
     }
@@ -61,7 +70,12 @@ public class UrlShortenerService {
         if (urlMapping != null) {
             throw new IllegalArgumentException(ExceptionMessages.ORIGINAL_URL_EXISTS);
         }
-        // TODO implement check for legit URLs
+        // URL validation
+        try {
+            new URL(unsafeOriginalUrl);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(ExceptionMessages.ORIGINAL_URL_MALFORMED);
+        }
         return unsafeOriginalUrl;
     }
 
@@ -69,7 +83,10 @@ public class UrlShortenerService {
         String shortUrlRep;
         if (shortUrlOptional.isPresent()) {
             shortUrlRep = shortUrlOptional.get();
-            // TODO implement check for legit URLs
+            // Check if short URL is alphanumeric
+            if (!shortUrlRep.matches("^[0-9a-zA-Z]+$")) {
+                throw new IllegalArgumentException(ExceptionMessages.SHORT_URL_NOT_ALPHA);
+            }
         } else {
             shortUrlRep = shortUrlRepGenerator.getNextShortUrlRep();
         }
