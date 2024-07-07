@@ -4,8 +4,8 @@ import de.abat.assignment.UrlShortener.entity.UrlMapping;
 import de.abat.assignment.UrlShortener.repository.UrlMappingRepository;
 import de.abat.assignment.UrlShortener.util.ExceptionMessages;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -16,8 +16,8 @@ public class UrlShortenerService {
     @Autowired
     private UrlMappingRepository urlMappingRepository;
 
-    @Value("${app.base-url}")
-    private String baseUrl;
+    @Autowired
+    private ShortUrlRepGenerator shortUrlRepGenerator;
 
     /**
      *
@@ -27,15 +27,14 @@ public class UrlShortenerService {
      * @throws NumberFormatException in case the provided TTL is not an integer.
      * @throws IllegalArgumentException in case the provided TTL is non-positive, the original or short URL is invalid.
      */
-    public String shortenUrl(String unsafeOriginalUrl, Optional<String> unsafeShortUrlId, Optional<String> unsafeTtl) {
+    public String shortenUrl(String unsafeOriginalUrl, Optional<String> unsafeShortUrlRep, Optional<String> unsafeTtl) {
         UrlMapping urlMapping = new UrlMapping();
 
         String originalUrl = checkUnsafeOriginalUrl(unsafeOriginalUrl);
         urlMapping.setOriginalUrl(originalUrl);
 
-        String shortUrlId = checkUnsafeShortUrlId(unsafeShortUrlId);
-        String shortUrl = buildShortUrl(shortUrlId);
-        urlMapping.setShortUrl(shortUrl);
+        String shortUrlRep = checkUnsafeShortUrlRep(unsafeShortUrlRep);
+        urlMapping.setShortUrlRep(shortUrlRep);
 
         int ttl = checkUnsafeTtl(unsafeTtl);
         urlMapping.setTtl(ttl);
@@ -44,22 +43,17 @@ public class UrlShortenerService {
 
         urlMappingRepository.save(urlMapping);
 
-        return shortUrl;
+        return urlMappingRepository.findByShortUrlRep(shortUrlRep).getShortUrl();
     }
 
-    private String buildShortUrl(String shortUrlId) {
-        return baseUrl + "/api/url/" + shortUrlId;
-    }
-
-    public String getOriginalUrl(String shortUrlId) {
-        String shortUrl = buildShortUrl(shortUrlId);
-        UrlMapping urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+    public String getOriginalUrl(String shortUrlRep) {
+        UrlMapping urlMapping = urlMappingRepository.findByShortUrlRep(shortUrlRep);
         return (urlMapping != null) ? urlMapping.getOriginalUrl() : null;
     }
 
-    public void deleteShortenedUrl(String shortUrlId) {
-        String shortUrl = buildShortUrl(shortUrlId);
-        urlMappingRepository.deleteByShortUrl(shortUrl);
+    @Transactional
+    public void deleteShortenedUrl(String shortUrlRep) {
+        urlMappingRepository.deleteByShortUrlRep(shortUrlRep);
     }
     
     private String checkUnsafeOriginalUrl(String unsafeOriginalUrl) {
@@ -71,21 +65,20 @@ public class UrlShortenerService {
         return unsafeOriginalUrl;
     }
 
-    private String checkUnsafeShortUrlId(Optional<String> shortUrlOptional) {
-        String shortUrlId;
+    private String checkUnsafeShortUrlRep(Optional<String> shortUrlOptional) {
+        String shortUrlRep;
         if (shortUrlOptional.isPresent()) {
-            shortUrlId = shortUrlOptional.get();
+            shortUrlRep = shortUrlOptional.get();
             // TODO implement check for legit URLs
         } else {
-            shortUrlId = generateNewShortUrl();
+            shortUrlRep = shortUrlRepGenerator.getNextShortUrlRep();
         }
 
-        String shortUrl = buildShortUrl(shortUrlId);
-        UrlMapping urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+        UrlMapping urlMapping = urlMappingRepository.findByShortUrlRep(shortUrlRep);
         if (urlMapping != null) {
             throw new IllegalArgumentException(ExceptionMessages.SHORT_URL_EXISTS);
         }
-        return shortUrlId;
+        return shortUrlRep;
     }
 
     private int checkUnsafeTtl(Optional<String> ttlOptional) {
@@ -105,10 +98,5 @@ public class UrlShortenerService {
             ttl = -1;  // Default infinite
         }
         return ttl;
-    }
-
-    private String generateNewShortUrl() {
-        // TODO Implement shortUrl generation
-        return "abc122";
     }
 }

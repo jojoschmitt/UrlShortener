@@ -1,5 +1,6 @@
 package de.abat.assignment.UrlShortener.entity;
 
+import de.abat.assignment.UrlShortener.service.ShortUrlCoder;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,13 @@ public class UrlMapping {
     private String originalUrl;
 
     @Column(nullable = false, unique = true)
+    private String shortUrlRep;
+
+    @Column(nullable = false, unique = true)
     private String shortUrl;
+
+    @Column(nullable = false, unique = true)
+    private long shortUrlId;
 
     @Column(nullable = false, updatable = false)
     private Integer ttl;  // In minutes
@@ -28,6 +35,8 @@ public class UrlMapping {
 
     @PrePersist
     public void prePersist() {
+        this.shortUrlId = ShortUrlCoder.decode(this.shortUrlRep);
+        this.shortUrl = ShortUrlCoder.toShortUrl(this.shortUrlRep);
         this.expirationTimestamp = this.creationTimestamp.plusMinutes(this.ttl);
     }
 
@@ -47,6 +56,14 @@ public class UrlMapping {
         this.originalUrl = originalUrl;
     }
 
+    public String getShortUrlRep() {
+        return shortUrlRep;
+    }
+
+    public void setShortUrlRep(String shortUrlRep) {
+        this.shortUrlRep = shortUrlRep;
+    }
+
     public String getShortUrl() {
         return this.shortUrl;
     }
@@ -55,11 +72,19 @@ public class UrlMapping {
         this.shortUrl = shortUrl;
     }
 
+    public long getShortUrlId() {
+        return shortUrlId;
+    }
+
+    public void setShortUrlId(long shortUrlId) {
+        this.shortUrlId = shortUrlId;
+    }
+
     public int getTtl() {
         return ttl;
     }
 
-    public void setTtl(int ttl) {
+    public void setTtl(Integer ttl) {
         this.ttl = ttl;
     }
 

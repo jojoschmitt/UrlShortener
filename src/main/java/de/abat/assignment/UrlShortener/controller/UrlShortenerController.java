@@ -23,13 +23,13 @@ public class UrlShortenerController {
     @PostMapping(value = "/shorten", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> shortenUrl(@RequestBody Map<String, String> requestBody) {
         String originalUrl = requestBody.get("originalUrl");
-        String shortUrlStr = requestBody.get("shortUrlId");
-        Optional<String> shortUrlIdOptional = Optional.ofNullable(shortUrlStr);
+        String shortUrlRepStr = requestBody.get("shortUrlRep");
+        Optional<String> shortUrlRepOptional = Optional.ofNullable(shortUrlRepStr);
         String ttlStr = requestBody.get("ttl");
         Optional<String> ttlOptional = Optional.ofNullable(ttlStr);
 
         try {
-            String shortUrl = urlShortenerService.shortenUrl(originalUrl, shortUrlIdOptional, ttlOptional);
+            String shortUrl = urlShortenerService.shortenUrl(originalUrl, shortUrlRepOptional, ttlOptional);
             ShortUrlResponse shortUrlResponse = new ShortUrlResponse(shortUrl);
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -48,7 +48,7 @@ public class UrlShortenerController {
                 return badRequest(message);
             }
             if (exceptionMessage.contains(ExceptionMessages.SHORT_URL_EXISTS)) {
-                String message = String.format(RestResponseMessages.SHORT_URL_EXISTS, shortUrlStr);
+                String message = String.format(RestResponseMessages.SHORT_URL_EXISTS, shortUrlRepStr);
                 return badRequest(message);
             }
             return badRequest(ttlStr);
@@ -95,9 +95,9 @@ public class UrlShortenerController {
         }
     }
 
-    @GetMapping("/{shortUrlId}")
-    public void redirectToOriginalUrl(@PathVariable String shortUrlId, HttpServletResponse response) throws IOException {
-        String originalUrl = urlShortenerService.getOriginalUrl(shortUrlId);
+    @GetMapping("/{shortUrlRep}")
+    public void redirectToOriginalUrl(@PathVariable String shortUrlRep, HttpServletResponse response) throws IOException {
+        String originalUrl = urlShortenerService.getOriginalUrl(shortUrlRep);
         if (originalUrl != null) {
             response.sendRedirect(originalUrl);
         } else {
@@ -105,9 +105,9 @@ public class UrlShortenerController {
         }
     }
 
-    @DeleteMapping("/{shortUrl}")
-    public void deleteShortenedUrl(@PathVariable String shortUrlId) {
-        urlShortenerService.deleteShortenedUrl(shortUrlId);
+    @DeleteMapping("/{shortUrlRep}")
+    public void deleteShortenedUrl(@PathVariable String shortUrlRep) {
+        urlShortenerService.deleteShortenedUrl(shortUrlRep);
     }
 
 }

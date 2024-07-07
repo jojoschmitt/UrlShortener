@@ -8,12 +8,16 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface UrlMappingRepository extends JpaRepository<UrlMapping, Long> {
     UrlMapping findByOriginalUrl(String originalUrl);
-    UrlMapping findByShortUrl(String shortUrl);
-    void deleteByShortUrl(String shortUrl);
+    UrlMapping findByShortUrlRep(String shortUrlRep);
+    void deleteByShortUrlRep(String shortUrlRep);
+
+    @Query("select u.shortUrlId from UrlMapping u")
+    List<Long> findAllShortUrlIds();
 
     /**
      * Deletes all URL mappings with an expiry timestamp in the past.
