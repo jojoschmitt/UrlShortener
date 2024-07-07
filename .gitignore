@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### MySQL Data ###
+MySQL Server/mysql_data/*
+!MySQL Server/mysql_data/.gitkeep

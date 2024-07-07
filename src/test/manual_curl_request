@@ -1,0 +1,2 @@
+# Add new mapping
+curl -X POST http://localhost:8080/api/url/shorten -H "Content-Type: application/json" -d "{\"originalUrl\":\"http://example.com\"}"
