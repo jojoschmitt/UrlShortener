@@ -76,6 +76,9 @@ public class UrlShortenerService {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException(ExceptionMessages.ORIGINAL_URL_MALFORMED);
         }
+        if (unsafeOriginalUrl.length() > 2048) {
+            throw new IllegalArgumentException(ExceptionMessages.ORIGINAL_URL_TOO_LONG);
+        }
         return unsafeOriginalUrl;
     }
 
@@ -107,7 +110,8 @@ public class UrlShortenerService {
             if (ttl < 1) {
                 throw new IllegalArgumentException(ExceptionMessages.ONLY_POSITIVE_TTL);
             }
-            // Limit TTL to 10 years
+            // Limit TTL to 10 years. Database only accepts dates in form yyyy-mm-dd but e.g. not yyyyy-mm-dd etc.
+            // Too high TTLs would lead to years past 9999, which would not work, hence the limit.
             if (ttl > 5256000) {
                 throw new IllegalArgumentException(ExceptionMessages.TTL_LIMIT_EXCEEDED);
             }

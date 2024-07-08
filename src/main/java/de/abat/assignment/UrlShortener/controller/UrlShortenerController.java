@@ -67,6 +67,10 @@ public class UrlShortenerController {
                 String message = String.format(RestResponseMessages.ORIGINAL_URL_MALFORMED, originalUrl);
                 return badRequest(message);
             }
+            if (exceptionMessage.contains(ExceptionMessages.ORIGINAL_URL_TOO_LONG)) {
+                String message = String.format(RestResponseMessages.ORIGINAL_URL_TOO_LONG, originalUrl);
+                return badRequest(message);
+            }
             if (exceptionMessage.contains(ExceptionMessages.SHORT_URL_NOT_ALPHA)) {
                 String message = String.format(RestResponseMessages.SHORT_URL_NOT_ALPHA, shortUrlRepStr);
                 return badRequest(message);
@@ -83,7 +87,7 @@ public class UrlShortenerController {
                 .body(errorResponse);
     }
 
-    private static class ShortUrlResponse {
+    public static class ShortUrlResponse {
 
         private String shortUrl;
 
@@ -100,7 +104,7 @@ public class UrlShortenerController {
         }
     }
 
-    private static class ErrorResponse {
+    public static class ErrorResponse {
         private String errorMessage;
 
         public ErrorResponse(String errorMessage) {

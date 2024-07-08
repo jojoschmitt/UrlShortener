@@ -9,4 +9,5 @@ public final class ExceptionMessages {
     public static final String SHORT_URL_NOT_ALPHA = "Provided short URL representation is not alphanumeric.";
     public static final String ONLY_POSITIVE_TTL = "Only positive TTLs allowed.";
     public static final String TTL_LIMIT_EXCEEDED = "TTL must not exceed 10 years.";
+    public static final String ORIGINAL_URL_TOO_LONG = "User provided URL is too long.";
 }

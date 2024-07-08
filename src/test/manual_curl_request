@@ -1,5 +1,5 @@
 # Add new mapping
-curl -X POST http://localhost:8080/api/url/shorten -H "Content-Type: application/json" -d "{\"originalUrl\":\"http://example.com\"}"
+curl -X POST http://localhost:8080/api/url/shorten -H "Content-Type: application/json" -d "{\"originalUrl\":\"https://google.com\", \"shortUrlRep\":\"gg\", \"ttl\":\"60\"}"
 
 # Delete mapping
-curl -X DELETE http://localhost:8080/api/url/<shortUrlId>
+curl -X DELETE http://localhost:8080/api/url/gg

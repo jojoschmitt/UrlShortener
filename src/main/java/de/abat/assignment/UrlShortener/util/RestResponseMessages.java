@@ -5,6 +5,7 @@ public final class RestResponseMessages {
 
     public static final String ORIGINAL_URL_EXISTS = "Invalid value for parameter 'originalUrl': '%s'. URL is already mapped.";
     public static final String ORIGINAL_URL_MALFORMED = "Invalid value for parameter 'originalUrl': '%s'. URL is malformed.";
+    public static final String ORIGINAL_URL_TOO_LONG = "Invalid value for parameter 'originalUrl': '%s'. URL exceeds 2048 characters.";
     public static final String SHORT_URL_EXISTS = "Invalid value for parameter 'shortUrlRep': '%s'. URL is already mapped.";
     public static final String SHORT_URL_NOT_ALPHA = "Invalid value for parameter 'shortUrlRep': '%s'. URL is not alphanumeric.";
     public static final String TTL_NOT_AN_INTEGER = "Invalid value for parameter 'ttl': '%s'. Must be a positive integer.";
